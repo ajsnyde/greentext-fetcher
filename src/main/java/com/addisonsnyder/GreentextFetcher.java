@@ -1,8 +1,10 @@
-package main.java.com.addisonsnyder;
+package com.addisonsnyder;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -23,11 +25,13 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class GreentextFetcher {
 
-	WebDriver driver;
-	int i = 0;
-	int page = 0;
+	private WebDriver driver;
+	private int i = 0;
+	private int page = 0;
+	private String url = "http://boards.4chan.org/b/";
+	private Path screenshotLocation = Paths.get("");
 
-	GreentextFetcher() {
+	public GreentextFetcher() {
 		WebDriverManager.phantomjs().setup();
 		driver = new PhantomJSDriver();
 		driver.manage().window().setSize(new Dimension(1280, 1080));
@@ -36,7 +40,7 @@ public class GreentextFetcher {
 	public void Fetch() throws IOException {
 		// go through n pages
 		for (int i = 0; i < 10; i++) {
-			driver.get("http://boards.4chan.org/b/" + ++page);
+			driver.get(url + ++page);
 
 			List<WebElement> elements = driver.findElements(By.className("thread"));
 
@@ -50,6 +54,11 @@ public class GreentextFetcher {
 		driver.quit();
 	}
 
+	/**
+	 * Attempt to click link to expand thread
+	 * 
+	 * @param ele
+	 */
 	private void clickFullText(WebElement ele) {
 		try {
 			WebElement clickSpan = ele.findElement(By.className("abbr"));
@@ -80,7 +89,23 @@ public class GreentextFetcher {
 		ImageIO.write(eleScreenshot, "png", screenshot);
 
 		// Copy the element screenshot to disk
-		File screenshotLocation = new File("C:\\Users\\Dreadhawk177\\Desktop\\4chanGreentext" + i++ + ".png");
-		FileUtils.copyFile(screenshot, screenshotLocation);
+		Path screenshotLocation = Paths.get(this.screenshotLocation.toString(), i++ + ".png");
+		FileUtils.copyFile(screenshot, screenshotLocation.toFile());
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public Path getScreenshotLocation() {
+		return screenshotLocation;
+	}
+
+	public void setScreenshotLocation(Path screenshotLocation) {
+		this.screenshotLocation = screenshotLocation;
 	}
 }
